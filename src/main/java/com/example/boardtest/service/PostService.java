@@ -44,7 +44,7 @@ public class PostService {
     //단건수정
     public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody) {
        Optional<Post> postOptional =  posts.stream().filter(post -> postId.equals(post.getPostId())).findFirst();
- 
+
        //해당 게시물이 존재하는지
        if (postOptional.isPresent()){
            Post postToUpdate = postOptional.get();
@@ -53,5 +53,17 @@ public class PostService {
        }else{
           throw  new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found");
        }
+    }
+
+    //게시물 삭제
+    public void deletePost(Long postId) {
+        //대상 게시물 먼저 조회
+        Optional<Post> postOptional =  posts.stream().filter(post -> postId.equals(post.getPostId())).findFirst();
+
+        if (postOptional.isPresent()){
+            posts.remove(postOptional.get());
+        }else{
+            throw  new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found");
+        }
     }
 }
