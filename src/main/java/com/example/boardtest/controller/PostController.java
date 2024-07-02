@@ -1,6 +1,7 @@
 package com.example.boardtest.controller;
 
 import com.example.boardtest.model.Post;
+import com.example.boardtest.model.PostPatchRequestBody;
 import com.example.boardtest.model.PostPostRequestBody;
 import com.example.boardtest.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class PostController {
     //전체조회
     @GetMapping
     public ResponseEntity<List<Post>> getPosts(){
-        List<Post> posts = postService.getPosts();
+        var posts = postService.getPosts();
         return ResponseEntity.ok(posts);
     }
 
@@ -40,7 +41,16 @@ public class PostController {
     //@RequestBody 가 정상적으로 동작하기 위해서는 빈생성자가 있어야 한다
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody PostPostRequestBody postPostRequestBody){
-        Post post = postService.createPost(postPostRequestBody);
+        var post = postService.createPost(postPostRequestBody);
+        return ResponseEntity.ok(post);
+    }
+
+
+
+    //단건 단위로 수정
+    @PatchMapping("/{postId}")
+    public ResponseEntity<Post> udpatePost(@PathVariable("postId") Long postId, @RequestBody PostPatchRequestBody postPatchRequestBody){
+        var post = postService.updatePost(postId,postPatchRequestBody);
         return ResponseEntity.ok(post);
     }
 

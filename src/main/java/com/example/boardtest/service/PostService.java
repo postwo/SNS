@@ -1,12 +1,14 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.model.Post;
+import com.example.boardtest.model.PostPatchRequestBody;
 import com.example.boardtest.model.PostPostRequestBody;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,18 +28,30 @@ public class PostService {
         return posts;
     }
 
-    //단일
+    //단건
     public Optional<Post> getPostByPostId(Long postId){
         return posts.stream().filter(post -> postId.equals(post.getPostId())).findFirst();
     }
 
     //게시물 생성
     public Post createPost(PostPostRequestBody postPostRequestBody) {
-       Long newPostId = posts.stream().mapToLong(Post::getPostId).max().orElse(0L) +1;
-
-       Post newPost = new Post(newPostId,postPostRequestBody.body(),ZonedDateTime.now());
+       var newPostId = posts.stream().mapToLong(Post::getPostId).max().orElse(0L) +1;
+       var newPost = new Post(newPostId,postPostRequestBody.body(),ZonedDateTime.now());
        posts.add(newPost);
-
        return newPost;
+    }
+
+    //단건수정
+    public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody) {
+       Optional<Post> postOptional =  posts.stream().filter(post -> postId.equals(post.getPostId())).findFirst();
+ 
+       //해당 게시물이 존재하는지
+       if (postOptional.isPresent()){
+           Post postToUpdate = postOptional.get();
+           postToUpdate.setBody(postPatchRequestBody.body());
+           return postToUpdate;
+       }else{
+          throw  new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found");
+       }
     }
 }
