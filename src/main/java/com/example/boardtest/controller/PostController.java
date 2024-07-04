@@ -5,13 +5,10 @@ import com.example.boardtest.model.PostPatchRequestBody;
 import com.example.boardtest.model.PostPostRequestBody;
 import com.example.boardtest.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -30,11 +27,8 @@ public class PostController {
     //단건조회
     @GetMapping("/{postId}")
     public ResponseEntity<Post> getPostByPostId(@PathVariable("postId") Long postId){
-
-        Optional<Post> matchingPost = postService.getPostByPostId(postId);
-
-       return matchingPost.map(post-> ResponseEntity.ok(post))
-                .orElseGet(()->ResponseEntity.notFound().build());
+        var post = postService.getPostByPostId(postId);
+       return ResponseEntity.ok(post);
     }
 
     //게시물 생성 POST /posts
