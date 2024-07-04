@@ -16,8 +16,8 @@ spring:
 
   security:
     user:
-      name: co
-      password: 12
+      name: board-admin
+      password: board-admin-password
 
 #logging:
 #  level:
