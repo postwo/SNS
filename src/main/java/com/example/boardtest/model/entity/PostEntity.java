@@ -52,4 +52,17 @@ public class PostEntity {
     public int hashCode() {
         return Objects.hash(postId, body, createdDateTime, updatedDateTime, deletedDateTime);
     }
+
+
+    //밑의 어노테이션들은 jpa에 의해서 실제 데이터가 내부적으로 저장되기 직전에 혹은 수정되기 직전에 원하는 로직을 수행할수있다
+    @PrePersist
+    private void prePersist(){
+        this.createdDateTime =ZonedDateTime.now();
+        this.updatedDateTime = this.createdDateTime;
+    }
+
+    @PreUpdate
+    private void preUpdate(){
+        this.updatedDateTime = ZonedDateTime.now();
+    }
 }
