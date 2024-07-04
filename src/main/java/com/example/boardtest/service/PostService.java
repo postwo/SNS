@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PostService {
@@ -33,8 +30,6 @@ public class PostService {
     public Post getPostByPostId(Long postId){
         var postEntity = postEntityRepository.findById(postId).orElseThrow(
                 ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found"));
-
-
         return Post.from(postEntity);
     }
 
@@ -48,27 +43,20 @@ public class PostService {
 
     //단건수정
     public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody) {
-       Optional<Post> postOptional =  posts.stream().filter(post -> postId.equals(post.getPostId())).findFirst();
 
-       //해당 게시물이 존재하는지
-       if (postOptional.isPresent()){
-           Post postToUpdate = postOptional.get();
-           postToUpdate.setBody(postPatchRequestBody.body());
-           return postToUpdate;
-       }else{
-          throw  new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found");
-       }
+        var postEntity = postEntityRepository.findById(postId).orElseThrow(
+                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found"));
+
+        postEntity.setBody(postPatchRequestBody.body());
+        var updatedPostEntity = postEntityRepository.save(postEntity);
+        return Post.from(updatedPostEntity);
     }
 
     //게시물 삭제
     public void deletePost(Long postId) {
-        //대상 게시물 먼저 조회
-        Optional<Post> postOptional =  posts.stream().filter(post -> postId.equals(post.getPostId())).findFirst();
+        var postEntity = postEntityRepository.findById(postId).orElseThrow(
+                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found"));
 
-        if (postOptional.isPresent()){
-            posts.remove(postOptional.get());
-        }else{
-            throw  new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found");
-        }
+        postEntityRepository.delete(postEntity);
     }
 }
