@@ -1,7 +1,7 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.exception.post.PostNotFoundException;
-import com.example.boardtest.model.Post;
+import com.example.boardtest.model.dto.Post;
 import com.example.boardtest.model.PostPatchRequestBody;
 import com.example.boardtest.model.PostPostRequestBody;
 import com.example.boardtest.model.entity.PostEntity;

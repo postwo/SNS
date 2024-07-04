@@ -1,6 +1,7 @@
 package com.example.boardtest.config;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -16,6 +18,12 @@ import java.util.List;
 
 @Configuration
 public class WebConfiguration  {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private JwtExceptionFilter jwtExceptionFilter;
 
     //cors bean 설정
     @Bean
@@ -36,6 +44,8 @@ public class WebConfiguration  {
                 .authorizeHttpRequests((requests) -> requests.anyRequest().authenticated())
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션이 생성되지 않게 설정
                 .csrf(CsrfConfigurer::disable) // csrf는 제외
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter,jwtAuthenticationFilter.getClass())
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }

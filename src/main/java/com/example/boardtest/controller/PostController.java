@@ -1,6 +1,6 @@
 package com.example.boardtest.controller;
 
-import com.example.boardtest.model.Post;
+import com.example.boardtest.model.dto.Post;
 import com.example.boardtest.model.PostPatchRequestBody;
 import com.example.boardtest.model.PostPostRequestBody;
 import com.example.boardtest.service.PostService;
