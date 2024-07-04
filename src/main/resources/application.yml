@@ -19,6 +19,7 @@ spring:
       name: board-admin
       password: board-admin-password
 
+# loggin 설정 부분
 #logging:
 #  level:
 #    org.hibernate.type: TRACE
@@ -26,6 +27,13 @@ spring:
 #    org.hibernate.engine.transaction.internal.TransactionImpl: DEBUG
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
+
+logging:
+  level:
+    #TRACE <DEBUH <INFO <WARN <ERROR
+    root: ERROR #설정한 값들에 대한것만 logging이 보인다
+
+
 
 
 
