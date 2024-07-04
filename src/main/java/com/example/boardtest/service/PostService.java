@@ -1,14 +1,13 @@
 package com.example.boardtest.service;
 
+import com.example.boardtest.exception.post.PostNotFoundException;
 import com.example.boardtest.model.Post;
 import com.example.boardtest.model.PostPatchRequestBody;
 import com.example.boardtest.model.PostPostRequestBody;
 import com.example.boardtest.model.entity.PostEntity;
 import com.example.boardtest.repository.PostEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class PostService {
     //단건
     public Post getPostByPostId(Long postId){
         var postEntity = postEntityRepository.findById(postId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found"));
+                ()->new PostNotFoundException(postId));
         return Post.from(postEntity);
     }
 
@@ -45,7 +44,7 @@ public class PostService {
     public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody) {
 
         var postEntity = postEntityRepository.findById(postId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found"));
+                ()->new PostNotFoundException(postId));
 
         postEntity.setBody(postPatchRequestBody.body());
         var updatedPostEntity = postEntityRepository.save(postEntity);
@@ -55,7 +54,7 @@ public class PostService {
     //게시물 삭제
     public void deletePost(Long postId) {
         var postEntity = postEntityRepository.findById(postId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Post not Found"));
+                ()->new PostNotFoundException(postId));
 
         postEntityRepository.delete(postEntity);
     }
