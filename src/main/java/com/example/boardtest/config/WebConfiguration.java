@@ -4,6 +4,7 @@ package com.example.boardtest.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -25,6 +26,7 @@ public class WebConfiguration  {
     @Autowired
     private JwtExceptionFilter jwtExceptionFilter;
 
+
     //cors bean 설정
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
@@ -41,7 +43,9 @@ public class WebConfiguration  {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults()) //cors 활성화
-                .authorizeHttpRequests((requests) -> requests.anyRequest().authenticated())
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers(HttpMethod.POST,"/api/*/users").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션이 생성되지 않게 설정
                 .csrf(CsrfConfigurer::disable) // csrf는 제외
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

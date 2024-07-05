@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -16,26 +18,29 @@ import java.util.HashMap;
 
 @Component
 public class JwtExceptionFilter extends OncePerRequestFilter {
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    private static final Logger logger = LoggerFactory.getLogger(JwtExceptionFilter.class);
 
-        try{
-            filterChain.doFilter(request,response);
-        }catch (JwtException exception){
-            //TODO: jwt 관련 커스텀 에러메시지 생성해 RESPONSE로 내려주기
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        try {
+            filterChain.doFilter(request, response);
+        } catch (JwtException exception) {
+            logger.error("JwtException {}", exception.getMessage());
+
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setCharacterEncoding("UTF-8");
 
-            var errorMap = new HashMap<String,Object>();
+            var errorMap = new HashMap<String, Object>();
             errorMap.put("status", HttpStatus.UNAUTHORIZED);
-            errorMap.put("message",exception.getMessage());
+            errorMap.put("message", exception.getMessage());
 
             ObjectMapper objectMapper = new ObjectMapper();
-            String responseJson = objectMapper.writeValueAsString(errorMap);//직렬화
-            response.getWriter().write(responseJson);
+            String json = objectMapper.writeValueAsString(errorMap);
+            response.getWriter().write(json);
         }
-
-
     }
 }

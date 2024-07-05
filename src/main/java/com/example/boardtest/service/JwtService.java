@@ -15,41 +15,40 @@ public class JwtService {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
+    //JWT 서명에 사용할 비밀 키를 생성
     private static final SecretKey key = Jwts.SIG.HS256.key().build();
 
-    //username을 추출해 jwt토큰으로 생성
-    public String genrateAccessToken(UserDetails userDetails){
-        return genrateToken(userDetails.getUsername());
+    //JWT 액세스 토큰에서 사용자 이름(주체)을 추출하는 공용 메서드
+    public String getUsername(String jwtToken) {
+        return getSubject(jwtToken);
     }
 
-
-    public String getUsername(String accessToken){
-        return getSubject(accessToken);
+    //UserDetails에서 추출한 사용자 이름을 사용하여 JWT 액세스 토큰을 생성하는 공용 메서드
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails.getUsername());
     }
-
 
     //jwt 토큰생성
-    private String genrateToken(String subject){
-        //만료기한
+    private String generateToken(String subject) {
         var now = new Date();
-        var exp = new Date(now.getTime()+(1000* 60* 60 *3));
-
-        return  Jwts.builder().subject(subject).signWith(key)
-                .issuedAt(now) //발행 시점
-                .expiration(exp) //만료 시점
-                .compact();
+        var exp = new Date(now.getTime() + (1000 * 60 * 60 * 3));
+        //issuedAt =발행시점 , expiration=만료시점
+        return Jwts.builder().subject(subject).signWith(key).issuedAt(now).expiration(exp).compact();
     }
 
     //subject를 추출
-    private String getSubject(String token){
-
-        try{
-            return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
-        }catch (JwtException e){
-            logger.error("JwtException",e);
+    private String getSubject(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (JwtException e) {
+            logger.error("JwtException", e);
             throw e;
         }
-
     }
 
 }

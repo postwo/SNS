@@ -1,6 +1,5 @@
 package com.example.boardtest.config;
 
-import com.example.boardtest.exception.jwt.JwtTokenNotFoundException;
 import com.example.boardtest.service.JwtService;
 import com.example.boardtest.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -21,41 +20,33 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtService jwtService;
+    @Autowired private JwtService jwtService;
+    @Autowired private UserService userService;
 
-    @Autowired
-    private UserService userService;
-
-    //클라이언트 요청이 처리되는 가정에서 필터가 중복해서 여러변 수행할수 있기 때문에 이렇게 한번만 수행하게 해준다
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //TODO: JWT검증
-        String BEARER_PERFIX = "BEARER ";
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String BEARER_PREFIX = "Bearer ";
         var authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        var securityContext = SecurityContextHolder.getContext();//인증정보 설정
+        var securityContext = SecurityContextHolder.getContext();
 
-
-        // jwt키값을 안넣었을때 또는 BEARER_PERFIX가 아닐경우 예외처리
-        if (ObjectUtils.isEmpty(authorization) || !authorization.startsWith(BEARER_PERFIX)){
-            throw new JwtTokenNotFoundException();
-        }
-
-        //jwt인증 수행 조건
-        if (!ObjectUtils.isEmpty(authorization) && authorization.startsWith(BEARER_PERFIX) && securityContext.getAuthentication() ==null){
-            var accessToken = authorization.substring(BEARER_PERFIX.length());
-            var username = jwtService.getUsername(accessToken);
+        if (!ObjectUtils.isEmpty(authorization)
+                && authorization.startsWith(BEARER_PREFIX)
+                && securityContext.getAuthentication() == null) {
+            var jwtToken = authorization.substring(BEARER_PREFIX.length());
+            var username = jwtService.getUsername(jwtToken);
             var userDetails = userService.loadUserByUsername(username);
 
-            var AuthenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails ,null, userDetails.getAuthorities()
-            );
-
-            AuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            securityContext.setAuthentication(AuthenticationToken);
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            usernamePasswordAuthenticationToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request));
+            securityContext.setAuthentication(usernamePasswordAuthenticationToken);
             SecurityContextHolder.setContext(securityContext);
         }
 
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }
