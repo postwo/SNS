@@ -1,4 +1,4 @@
-package com.example.boardtest.model.dto;
+package com.example.boardtest.model.user;
 
 import com.example.boardtest.model.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;

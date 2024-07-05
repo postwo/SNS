@@ -1,8 +1,8 @@
 package com.example.boardtest.controller;
 
-import com.example.boardtest.model.dto.Post;
-import com.example.boardtest.model.PostPatchRequestBody;
-import com.example.boardtest.model.PostPostRequestBody;
+import com.example.boardtest.model.post.Post;
+import com.example.boardtest.model.post.PostPatchRequestBody;
+import com.example.boardtest.model.post.PostPostRequestBody;
 import com.example.boardtest.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

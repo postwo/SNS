@@ -1,8 +1,9 @@
 package com.example.boardtest.controller;
 
-import com.example.boardtest.model.UserSingUpRequestBody;
-import com.example.boardtest.model.dto.User;
+import com.example.boardtest.model.user.UserSingUpRequestBody;
+import com.example.boardtest.model.user.User;
 import com.example.boardtest.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +19,7 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public ResponseEntity<User> singup(@RequestBody UserSingUpRequestBody userSingupReqestBody){
+    public ResponseEntity<User> singup(@Valid @RequestBody UserSingUpRequestBody userSingupReqestBody){
         var user = userService.signUp(userSingupReqestBody.username(),userSingupReqestBody.password());
         return ResponseEntity.ok(user);
 //        return new ResponseEntity<>(user, HttpStatus.OK);

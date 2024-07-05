@@ -1,4 +1,4 @@
-package com.example.boardtest.model;
+package com.example.boardtest.model.post;
 
 
 

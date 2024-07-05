@@ -1,7 +1,7 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.exception.user.UserAleradyExistsException;
-import com.example.boardtest.model.dto.User;
+import com.example.boardtest.model.user.User;
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
