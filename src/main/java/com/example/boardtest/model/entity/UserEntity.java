@@ -12,7 +12,9 @@ import java.util.Collection;
 import java.util.Random;
 
 @Entity
-@Table(name = "\"users\"") //이렇게 하는이유는 postgres sql을 사용하고 있는데 postgres sql내부에서 이미 사용되고 있는 예약어 이다 그래서 이렇게 해줘야 데이터베이스 내부적으로 사용가능하다
+@Table(name = "\"users\"",
+indexes = {@Index(name = "user_username_idx",columnList = "username",unique = true)}) //이렇게 하는이유는 postgres sql을 사용하고 있는데 postgres sql내부에서 이미 사용되고 있는 예약어 이다 그래서 이렇게 해줘야 데이터베이스 내부적으로 사용가능하다
+//unique = true) 중복생성을 사용못하게 막는다
 @Getter
 @Setter
 //이렇게 하면 서비스상에는 존재하지 않지만 데이터베이스 상에는 내부적으로 존재하게 삭제할수 있다

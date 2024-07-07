@@ -1,8 +1,10 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.exception.user.UserAleradyExistsException;
-import com.example.boardtest.model.user.User;
+import com.example.boardtest.exception.user.UserNotFoundException;
 import com.example.boardtest.model.entity.UserEntity;
+import com.example.boardtest.model.user.User;
+import com.example.boardtest.model.user.UserAuthenticationResponse;
 import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +21,10 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -37,4 +43,20 @@ public class UserService implements UserDetailsService {
        var userEntity = userEntityRepository.save(UserEntity.of(username, passwordEncoder.encode(password)));
         return User.from(userEntity);
     }
+
+
+    public UserAuthenticationResponse login(String username, String password) {
+        //저장된 유저 찾기
+        var userEntity =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+
+        if (passwordEncoder.matches(password, userEntity.getPassword())) {
+            var accessToken = jwtService.generateToken(userEntity);
+            return new UserAuthenticationResponse(accessToken);
+        } else {
+            throw new UserNotFoundException();
+        }
+    }
+
+
 }

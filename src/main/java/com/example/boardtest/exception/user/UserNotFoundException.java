@@ -12,9 +12,9 @@ public class UserNotFoundException extends ClientErrorException {
         super(HttpStatus.NOT_FOUND,"User Not Found");
     }
 
-    //예외가 발생했을때 postid를 알고 있을경우
-    public UserNotFoundException(Long userId) {
-        super(HttpStatus.NOT_FOUND,"User with userId" + userId + "Post Not Found");
+
+    public UserNotFoundException(String username) {
+        super(HttpStatus.NOT_FOUND, "User with username " + username + " not found.");
     }
 
 

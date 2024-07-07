@@ -44,7 +44,7 @@ public class WebConfiguration  {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults()) //cors 활성화
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(HttpMethod.POST,"/api/*/users").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/*/users","/api/*/users/authenticate").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션이 생성되지 않게 설정
                 .csrf(CsrfConfigurer::disable) // csrf는 제외

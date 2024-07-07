@@ -1,6 +1,8 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.exception.post.PostNotFoundException;
+import com.example.boardtest.exception.user.UserNotAllowedException;
+import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.post.Post;
 import com.example.boardtest.model.post.PostPatchRequestBody;
 import com.example.boardtest.model.post.PostPostRequestBody;
@@ -33,18 +35,22 @@ public class PostService {
     }
 
     //게시물 생성
-    public Post createPost(PostPostRequestBody postPostRequestBody) {
-       var postEntity  = new PostEntity();
-       postEntity.setBody(postPostRequestBody.body());
-       var savedPostEntity = postEntityRepository.save(postEntity);
-       return Post.from(savedPostEntity);
+    public Post createPost(PostPostRequestBody postPostRequestBody, UserEntity currnetUser) {
+       var postEntity = postEntityRepository.save(
+               PostEntity.of(postPostRequestBody.body(), currnetUser));
+       return Post.from(postEntity);
     }
 
+
     //단건수정
-    public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody) {
+    public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody,UserEntity currentUser) {
 
         var postEntity = postEntityRepository.findById(postId).orElseThrow(
                 ()->new PostNotFoundException(postId));
+
+        if (!postEntity.getUser().equals(currentUser)){
+            throw new UserNotAllowedException();
+        }
 
         postEntity.setBody(postPatchRequestBody.body());
         var updatedPostEntity = postEntityRepository.save(postEntity);
@@ -52,9 +58,13 @@ public class PostService {
     }
 
     //게시물 삭제
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId,UserEntity currentUser) {
         var postEntity = postEntityRepository.findById(postId).orElseThrow(
                 ()->new PostNotFoundException(postId));
+
+        if (!postEntity.getUser().equals(currentUser)){
+            throw new UserNotAllowedException();
+        }
 
         postEntityRepository.delete(postEntity);
     }
