@@ -2,12 +2,14 @@ package com.example.boardtest.service;
 
 import com.example.boardtest.exception.post.PostNotFoundException;
 import com.example.boardtest.exception.user.UserNotAllowedException;
+import com.example.boardtest.exception.user.UserNotFoundException;
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.post.Post;
 import com.example.boardtest.model.post.PostPatchRequestBody;
 import com.example.boardtest.model.post.PostPostRequestBody;
 import com.example.boardtest.model.entity.PostEntity;
 import com.example.boardtest.repository.PostEntityRepository;
+import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,10 @@ public class PostService {
 
     @Autowired
     private PostEntityRepository postEntityRepository;
+
+    @Autowired
+    private UserEntityRepository userEntityRepository;
+
 
 
 
@@ -67,5 +73,13 @@ public class PostService {
         }
 
         postEntityRepository.delete(postEntity);
+    }
+
+    //특정 유저가 작성한 게시물을 모두 조회
+    public List<Post> getPostsByUsername(String username) {
+        var user =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+        List<PostEntity> postEntities = postEntityRepository.findByUser(user);
+        return postEntities.stream().map(Post::from).toList();
     }
 }

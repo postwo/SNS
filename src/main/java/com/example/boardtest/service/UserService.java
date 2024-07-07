@@ -1,10 +1,12 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.exception.user.UserAleradyExistsException;
+import com.example.boardtest.exception.user.UserNotAllowedException;
 import com.example.boardtest.exception.user.UserNotFoundException;
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.user.User;
 import com.example.boardtest.model.user.UserAuthenticationResponse;
+import com.example.boardtest.model.user.UserPatchRequestBody;
 import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -80,5 +82,21 @@ public class UserService implements UserDetailsService {
     public User getUser(String username) {
         var userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
     return User.from(userEntity);
+    }
+
+    //회원정보 수정
+
+    public User updateUser(   String username, UserPatchRequestBody userPatchRequestBody, UserEntity currentUser) {
+        var user =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+        if (!currentUser.equals(user)) {
+            throw new UserNotAllowedException();
+        }
+
+        if (userPatchRequestBody.description() != null) {
+            user.setDescription(userPatchRequestBody.description());
+        }
+
+        return User.from(userEntityRepository.save(user));
     }
 }

@@ -1,14 +1,15 @@
 package com.example.boardtest.controller;
 
-import com.example.boardtest.model.user.User;
-import com.example.boardtest.model.user.UserAuthenticationResponse;
-import com.example.boardtest.model.user.UserLoginRequestBody;
-import com.example.boardtest.model.user.UserSingUpRequestBody;
+import com.example.boardtest.model.entity.UserEntity;
+import com.example.boardtest.model.post.Post;
+import com.example.boardtest.model.user.*;
+import com.example.boardtest.service.PostService;
 import com.example.boardtest.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    PostService postService;
 
 
     //회원가입
@@ -55,5 +59,18 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    //정보수정
+    @PatchMapping("/{username}")
+    public ResponseEntity<User> getUser(@PathVariable String username, @RequestBody UserPatchRequestBody requestBody, Authentication authentication){
+        var user = userService.updateUser(username,requestBody,(UserEntity) authentication.getPrincipal());
+        return ResponseEntity.ok(user);
+    }
 
+
+    //특정 유저가 작성한 게시물을 모두 조회
+    @GetMapping("/{username}/posts")
+    public ResponseEntity<List<Post>> getPostsByUsername(@PathVariable String username){
+        var posts = postService.getPostsByUsername(username);
+        return ResponseEntity.ok(posts);
+    }
 }
