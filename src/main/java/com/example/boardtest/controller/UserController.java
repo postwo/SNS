@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/v1/users")
@@ -39,6 +39,21 @@ public class UserController {
     }
 
 
+
+    //검색
+    @GetMapping
+    public ResponseEntity<List<User>> getUsers(@RequestParam(required = false) String query){
+        var users = userService.getUsers(query);
+        return ResponseEntity.ok(users);
+    }
+
+
+    //단건 조회
+    @GetMapping("/{username}")
+    public ResponseEntity<User> getUser(@PathVariable String username){
+        var user = userService.getUser(username);
+        return ResponseEntity.ok(user);
+    }
 
 
 }

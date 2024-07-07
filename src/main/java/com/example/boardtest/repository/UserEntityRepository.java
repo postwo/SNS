@@ -11,5 +11,7 @@ public interface UserEntityRepository extends JpaRepository<UserEntity,Long> {
     Optional<UserEntity>findByUsername(String username);
 
 
+    //검색  전달받은 username이 부분적으로 포함되는걸 조회
+    List<UserEntity> findByUsernameContaining(String username);
 
 }
