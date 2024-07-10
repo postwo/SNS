@@ -12,14 +12,14 @@ import java.time.ZonedDateTime;
 //이걸 적용하면 null값은 json에서 안보여준다
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record Reply(
-        Long ReplyId,
+        Long replyId,
         String body,
         User user,
         Post post,
         ZonedDateTime createdDateTime,
         ZonedDateTime updatedDateTime,
         ZonedDateTime deletedDateTime) {
-    public static Reply from(ReplyEntity replyEntity){
+    public static Reply from(ReplyEntity replyEntity) {
         return new Reply(
                 replyEntity.getReplyId(),
                 replyEntity.getBody(),
@@ -27,7 +27,6 @@ public record Reply(
                 Post.from(replyEntity.getPost()),
                 replyEntity.getCreatedDateTime(),
                 replyEntity.getUpdatedDateTime(),
-                replyEntity.getDeletedDateTime()
-        );
+                replyEntity.getDeletedDateTime());
     }
 }

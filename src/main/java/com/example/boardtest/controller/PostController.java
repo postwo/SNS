@@ -8,6 +8,7 @@ import com.example.boardtest.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class PostController {
     public ResponseEntity<Post> getPostByPostId(@PathVariable("postId") Long postId){
         logger.info("GET /API/v1/posts/{}",postId);
         var post = postService.getPostByPostId(postId);
-       return ResponseEntity.ok(post);
+        return ResponseEntity.ok(post);
     }
 
     //게시물 생성 POST /posts
@@ -66,5 +67,12 @@ public class PostController {
         postService.deletePost(postId,(UserEntity)authentication.getPrincipal());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<Post> toggleLike(@PathVariable Long postId, Authentication authentication) {
+        var post = postService.toggleLike(postId, (UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(post, HttpStatus.OK);
+    }
+
 
 }

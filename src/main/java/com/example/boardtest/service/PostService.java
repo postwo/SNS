@@ -3,15 +3,18 @@ package com.example.boardtest.service;
 import com.example.boardtest.exception.post.PostNotFoundException;
 import com.example.boardtest.exception.user.UserNotAllowedException;
 import com.example.boardtest.exception.user.UserNotFoundException;
+import com.example.boardtest.model.entity.LikeEntity;
+import com.example.boardtest.model.entity.PostEntity;
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.post.Post;
 import com.example.boardtest.model.post.PostPatchRequestBody;
 import com.example.boardtest.model.post.PostPostRequestBody;
-import com.example.boardtest.model.entity.PostEntity;
+import com.example.boardtest.repository.LikeEntityRepository;
 import com.example.boardtest.repository.PostEntityRepository;
 import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,13 +27,16 @@ public class PostService {
     @Autowired
     private UserEntityRepository userEntityRepository;
 
+    @Autowired
+    private LikeEntityRepository likeEntityRepository;
+
 
 
 
     //목록
     public List<Post> getPosts(){
-       var postEntities = postEntityRepository.findAll();
-       return postEntities.stream().map(Post::from).toList();
+        var postEntities = postEntityRepository.findAll();
+        return postEntities.stream().map(Post::from).toList();
     }
 
     //단건
@@ -42,9 +48,9 @@ public class PostService {
 
     //게시물 생성
     public Post createPost(PostPostRequestBody postPostRequestBody, UserEntity currnetUser) {
-       var postEntity = postEntityRepository.save(
-               PostEntity.of(postPostRequestBody.body(), currnetUser));
-       return Post.from(postEntity);
+        var postEntity = postEntityRepository.save(
+                PostEntity.of(postPostRequestBody.body(), currnetUser));
+        return Post.from(postEntity);
     }
 
 
@@ -81,5 +87,26 @@ public class PostService {
                 userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
         List<PostEntity> postEntities = postEntityRepository.findByUser(user);
         return postEntities.stream().map(Post::from).toList();
+    }
+
+    //좋아요
+    @Transactional
+    public Post toggleLike(Long postId, UserEntity currentUser) {
+
+        var postEntity = postEntityRepository.findById(postId).orElseThrow(
+                ()->new PostNotFoundException(postId));
+
+        var likeEntity = likeEntityRepository.findByUserAndPost(currentUser,postEntity);
+
+        //like가 이미존재할경우
+        if (likeEntity.isPresent()){
+            likeEntityRepository.delete(likeEntity.get());
+            postEntity.setLikesCount(Math.max(0,postEntity.getLikesCount()) -1);
+        }else{
+            likeEntityRepository.save(LikeEntity.of(currentUser,postEntity));
+            postEntity.setLikesCount(postEntity.getLikesCount() +1);
+        }
+
+        return Post.from(postEntityRepository.save(postEntity));
     }
 }

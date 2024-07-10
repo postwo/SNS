@@ -12,12 +12,12 @@ public class ReplyNotFoundException extends ClientErrorException {
         super(HttpStatus.NOT_FOUND,"Reply Not Found");
     }
 
-    //예외가 발생했을때 postid를 알고 있을경우
-    public ReplyNotFoundException(Long postId) {
-        super(HttpStatus.NOT_FOUND,"Reply with Replyid" + postId + "Reply Not Found");
+    //예외가 발생했을때 replyId를 알고 있을경우
+    public ReplyNotFoundException(Long replyId) {
+        super(HttpStatus.NOT_FOUND,"Reply with Replyid" + replyId + "Reply Not Found");
     }
 
-    //postid는 모르지만 구체적인 메시지를 남기고 싶다
+    //replyId는 모르지만 구체적인 메시지를 남기고 싶다
     public ReplyNotFoundException(String message) {
         super(HttpStatus.NOT_FOUND,message);
     }

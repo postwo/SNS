@@ -15,4 +15,6 @@ public interface ReplyEntityRepository extends JpaRepository<ReplyEntity,Long> {
 
     //특정 게시물 에있는 모든 댓글을 찾아온다
     List<ReplyEntity> findByPost(PostEntity post);
+
+
 }

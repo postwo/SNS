@@ -33,6 +33,9 @@ public class PostEntity {
     private Long repliesCount = 0L;
 
     @Column
+    private Long likesCount = 0L;
+
+    @Column
     private ZonedDateTime createdDateTime;
 
     @Column
