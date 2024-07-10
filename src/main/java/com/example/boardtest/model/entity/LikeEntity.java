@@ -1,33 +1,19 @@
 package com.example.boardtest.model.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
 @Table(
-        name = "\"like\"", // 예약된 명령어여서 이렇게 해줘야 사용할수 있다
-        indexes = {
-                @Index(name = "like_userid_postid_idx", columnList = "userid,postid",unique = true)})
-                //좋아요가 2개 이상 생성되는걸 방지하기 위해 unique를 설정
-                // 성능개선 = 많이 조회할거를 index를 생성한다
-
+        name = "\"like\"",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"userid", "postid"})})
 public class LikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long likeId;
-
-    @Column
-    private ZonedDateTime createdDateTime;
-
 
     @ManyToOne
     @JoinColumn(name = "userid")
@@ -37,19 +23,66 @@ public class LikeEntity {
     @JoinColumn(name = "postid")
     private PostEntity post;
 
-    public static LikeEntity of( UserEntity user, PostEntity post){
-        var reply  = new LikeEntity();
-        reply.setUser(user);
-        reply.setPost(post);
-        return reply;
+    @Column private ZonedDateTime createdDateTime;
+
+    public LikeEntity() {}
+
+    public static LikeEntity of(UserEntity user, PostEntity post) {
+        LikeEntity like = new LikeEntity();
+        like.setUser(user);
+        like.setPost(post);
+        return like;
     }
 
+    public Long getLikeId() {
+        return likeId;
+    }
 
+    public void setLikeId(Long likeId) {
+        this.likeId = likeId;
+    }
 
-    //밑의 어노테이션들은 jpa에 의해서 실제 데이터가 내부적으로 저장되기 직전에 혹은 수정되기 직전에 원하는 로직을 수행할수있다
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public PostEntity getPost() {
+        return post;
+    }
+
+    public void setPost(PostEntity post) {
+        this.post = post;
+    }
+
+    public ZonedDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LikeEntity that)) return false;
+        return Objects.equals(getLikeId(), that.getLikeId())
+                && Objects.equals(getUser(), that.getUser())
+                && Objects.equals(getPost(), that.getPost())
+                && Objects.equals(getCreatedDateTime(), that.getCreatedDateTime());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getLikeId(), getUser(), getPost(), getCreatedDateTime());
+    }
+
     @PrePersist
-    private void prePersist(){
-        this.createdDateTime =ZonedDateTime.now();
+    private void prePersist() {
+        this.createdDateTime = ZonedDateTime.now();
     }
-
 }

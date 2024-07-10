@@ -92,19 +92,17 @@ public class PostService {
     //좋아요
     @Transactional
     public Post toggleLike(Long postId, UserEntity currentUser) {
+        PostEntity postEntity = postEntityRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
 
-        var postEntity = postEntityRepository.findById(postId).orElseThrow(
-                ()->new PostNotFoundException(postId));
+        var likeEntity = likeEntityRepository.findByUserAndPost(currentUser, postEntity);
 
-        var likeEntity = likeEntityRepository.findByUserAndPost(currentUser,postEntity);
-
-        //like가 이미존재할경우
-        if (likeEntity.isPresent()){
+        if (likeEntity.isPresent()) {
             likeEntityRepository.delete(likeEntity.get());
-            postEntity.setLikesCount(Math.max(0,postEntity.getLikesCount()) -1);
-        }else{
-            likeEntityRepository.save(LikeEntity.of(currentUser,postEntity));
-            postEntity.setLikesCount(postEntity.getLikesCount() +1);
+            postEntity.setLikesCount(Math.max(0, (postEntity.getLikesCount() == null ? 0 : postEntity.getLikesCount()) - 1));
+        } else {
+            likeEntityRepository.save(LikeEntity.of(currentUser, postEntity));
+            postEntity.setLikesCount((postEntity.getLikesCount() == null ? 0 : postEntity.getLikesCount()) + 1);
         }
 
         return Post.from(postEntityRepository.save(postEntity));
