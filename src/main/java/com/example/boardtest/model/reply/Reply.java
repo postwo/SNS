@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 //이걸 적용하면 null값은 json에서 안보여준다
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record Reply(
-        Long postId,
+        Long ReplyId,
         String body,
         User user,
         Post post,

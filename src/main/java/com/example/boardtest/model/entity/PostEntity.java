@@ -30,6 +30,9 @@ public class PostEntity {
     private String body;
 
     @Column
+    private Long repliesCount = 0L;
+
+    @Column
     private ZonedDateTime createdDateTime;
 
     @Column
