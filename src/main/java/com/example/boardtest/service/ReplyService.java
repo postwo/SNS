@@ -65,28 +65,23 @@ public class ReplyService {
         return Reply.from(replyEntityRepository.save(replyEntity));
     }
 
+    //댓글 삭제
+    public void deleteReply(Long postId, Long replyId, UserEntity currentUser) {
+        //게시물 조회
+        postEntityRepository.findById(postId).orElseThrow(
+                ()->new PostNotFoundException(postId));
 
- 
-//
-//    //게시물 삭제
-//    public void deletePost(Long postId,UserEntity currentUser) {
-//        var postEntity = postEntityRepository.findById(postId).orElseThrow(
-//                ()->new PostNotFoundException(postId));
-//
-//        if (!postEntity.getUser().equals(currentUser)){
-//            throw new UserNotAllowedException();
-//        }
-//
-//        postEntityRepository.delete(postEntity);
-//    }
-//
-//    //특정 유저가 작성한 게시물을 모두 조회
-//    public List<Post> getPostsByUsername(String username) {
-//        var user =
-//                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
-//        List<PostEntity> postEntities = postEntityRepository.findByUser(user);
-//        return postEntities.stream().map(Post::from).toList();
-//    }
+        var replyEntity = replyEntityRepository.findById(replyId).orElseThrow(()->new ReplyNotFoundException(replyId));
+
+        if (!replyEntity.getUser().equals(currentUser)) {
+            throw new UserNotAllowedException();
+        }
+
+        replyEntityRepository.delete(replyEntity);
+
+    }
+
+
 
 
 }

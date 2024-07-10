@@ -1,7 +1,6 @@
 package com.example.boardtest.controller;
 
 import com.example.boardtest.model.entity.UserEntity;
-import com.example.boardtest.model.post.Post;
 import com.example.boardtest.model.reply.Reply;
 import com.example.boardtest.model.reply.ReplyPatchRequestBody;
 import com.example.boardtest.model.reply.ReplyPostRequestBody;
@@ -32,7 +31,7 @@ public class ReplyController {
     //댓글 생성
     //@RequestBody 가 정상적으로 동작하기 위해서는 빈생성자가 있어야 한다
     @PostMapping
-    public ResponseEntity<Post> createReply(@PathVariable Long postId,
+    public ResponseEntity<Reply> createReply(@PathVariable Long postId,
                                             @RequestBody ReplyPostRequestBody replyPostRequestBody, Authentication authentication){
         var reply = replyService.createReply(postId,replyPostRequestBody,(UserEntity) authentication.getPrincipal());
         return ResponseEntity.ok(reply);
@@ -50,11 +49,11 @@ public class ReplyController {
         return ResponseEntity.ok(reply);
     }
 
-    //게시물 삭제
-//    @DeleteMapping("/{replyId}")
-//    public ResponseEntity<Void> deletePost(@PathVariable("replyId") Long postId,Authentication authentication,@PathVariable("replyId") Long replyId){
-//        replyService.deleteReply(postId,(UserEntity)authentication.getPrincipal());
-//        return ResponseEntity.noContent().build();
-//    }
+    //댓글 삭제
+    @DeleteMapping("/{replyId}")
+    public ResponseEntity<Void> deletePost(@PathVariable("replyId") Long postId,Authentication authentication,@PathVariable("replyId") Long replyId){
+        replyService.deleteReply(postId,replyId,(UserEntity)authentication.getPrincipal());
+        return ResponseEntity.noContent().build();
+    }
 
 }
