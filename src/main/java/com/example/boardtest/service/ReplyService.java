@@ -1,9 +1,12 @@
 package com.example.boardtest.service;
 
 import com.example.boardtest.exception.post.PostNotFoundException;
+import com.example.boardtest.exception.reply.ReplyNotFoundException;
+import com.example.boardtest.exception.user.UserNotAllowedException;
 import com.example.boardtest.model.entity.ReplyEntity;
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.reply.Reply;
+import com.example.boardtest.model.reply.ReplyPatchRequestBody;
 import com.example.boardtest.model.reply.ReplyPostRequestBody;
 import com.example.boardtest.repository.PostEntityRepository;
 import com.example.boardtest.repository.ReplyEntityRepository;
@@ -45,22 +48,25 @@ public class ReplyService {
         return Reply.from(replyEntity);
     }
 
+    //댓글수정
+    public Reply updateReply(Long postId, Long replyId, ReplyPatchRequestBody replyPatchRequestBody, UserEntity currentUser) {
+        //게시물 조회
+       postEntityRepository.findById(postId).orElseThrow(
+                ()->new PostNotFoundException(postId));
+
+        var replyEntity = replyEntityRepository.findById(replyId).orElseThrow(()->new ReplyNotFoundException(replyId));
+
+        if (!replyEntity.getUser().equals(currentUser)) {
+            throw new UserNotAllowedException();
+        }
+
+        replyEntity.setBody(replyPatchRequestBody.body());
+
+        return Reply.from(replyEntityRepository.save(replyEntity));
+    }
 
 
-//    //단건수정
-//    public Post updatePost(Long postId, PostPatchRequestBody postPatchRequestBody,UserEntity currentUser) {
-//
-//        var postEntity = postEntityRepository.findById(postId).orElseThrow(
-//                ()->new PostNotFoundException(postId));
-//
-//        if (!postEntity.getUser().equals(currentUser)){
-//            throw new UserNotAllowedException();
-//        }
-//
-//        postEntity.setBody(postPatchRequestBody.body());
-//        var updatedPostEntity = postEntityRepository.save(postEntity);
-//        return Post.from(updatedPostEntity);
-//    }
+ 
 //
 //    //게시물 삭제
 //    public void deletePost(Long postId,UserEntity currentUser) {

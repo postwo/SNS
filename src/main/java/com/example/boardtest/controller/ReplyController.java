@@ -2,8 +2,8 @@ package com.example.boardtest.controller;
 
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.post.Post;
-import com.example.boardtest.model.post.PostPatchRequestBody;
 import com.example.boardtest.model.reply.Reply;
+import com.example.boardtest.model.reply.ReplyPatchRequestBody;
 import com.example.boardtest.model.reply.ReplyPostRequestBody;
 import com.example.boardtest.service.ReplyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,18 +40,20 @@ public class ReplyController {
 
 
 
-//    //단건 단위로 수정
-//    @PatchMapping("/{postId}")
-//    public ResponseEntity<Post> udpatePost(@PathVariable("postId") Long postId, @RequestBody PostPatchRequestBody postPatchRequestBody,
-//                                           Authentication authentication){
-//        var post = postService.updatePost(postId,postPatchRequestBody,(UserEntity)authentication.getPrincipal());
-//        return ResponseEntity.ok(post);
-//    }
-//
-//    //게시물 삭제
-//    @DeleteMapping("/{postId}")
-//    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId,Authentication authentication){
-//        postService.deletePost(postId,(UserEntity)authentication.getPrincipal());
+    //수정
+    @PatchMapping("/{replyId}")
+    public ResponseEntity<Reply> udpatePost(@PathVariable("postId") Long postId,
+                                           @PathVariable("replyId") Long replyId
+                                            ,@RequestBody ReplyPatchRequestBody replyPatchRequestBody,
+                                           Authentication authentication){
+        var reply = replyService.updateReply(postId,replyId,replyPatchRequestBody,(UserEntity)authentication.getPrincipal());
+        return ResponseEntity.ok(reply);
+    }
+
+    //게시물 삭제
+//    @DeleteMapping("/{replyId}")
+//    public ResponseEntity<Void> deletePost(@PathVariable("replyId") Long postId,Authentication authentication,@PathVariable("replyId") Long replyId){
+//        replyService.deleteReply(postId,(UserEntity)authentication.getPrincipal());
 //        return ResponseEntity.noContent().build();
 //    }
 
