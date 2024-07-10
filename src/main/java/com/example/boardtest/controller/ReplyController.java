@@ -5,6 +5,7 @@ import com.example.boardtest.model.reply.Reply;
 import com.example.boardtest.model.reply.ReplyPatchRequestBody;
 import com.example.boardtest.model.reply.ReplyPostRequestBody;
 import com.example.boardtest.service.ReplyService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,8 +15,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/posts/{postId}/replies")
+@Slf4j
 public class ReplyController {
-
 
     @Autowired
     private ReplyService replyService;
@@ -41,8 +42,8 @@ public class ReplyController {
 
     //수정
     @PatchMapping("/{replyId}")
-    public ResponseEntity<Reply> udpatePost(@PathVariable("postId") Long postId,
-                                           @PathVariable("replyId") Long replyId
+    public ResponseEntity<Reply> udpatePost(@PathVariable Long postId,
+                                           @PathVariable Long replyId
                                             ,@RequestBody ReplyPatchRequestBody replyPatchRequestBody,
                                            Authentication authentication){
         var reply = replyService.updateReply(postId,replyId,replyPatchRequestBody,(UserEntity)authentication.getPrincipal());
@@ -51,7 +52,8 @@ public class ReplyController {
 
     //댓글 삭제
     @DeleteMapping("/{replyId}")
-    public ResponseEntity<Void> deletePost(@PathVariable("replyId") Long postId,Authentication authentication,@PathVariable("replyId") Long replyId){
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId,Authentication authentication,@PathVariable Long replyId){
+
         replyService.deleteReply(postId,replyId,(UserEntity)authentication.getPrincipal());
         return ResponseEntity.noContent().build();
     }
