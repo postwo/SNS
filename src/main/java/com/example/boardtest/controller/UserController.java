@@ -74,7 +74,7 @@ public class UserController {
         return ResponseEntity.ok(posts);
     }
 
-    
+
 
     //follows 추가
     @PostMapping("/{username}/follows")
@@ -90,4 +90,8 @@ public class UserController {
         var user = userService.unFollow(username, (UserEntity) authentication.getPrincipal());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+
+
+
 }
