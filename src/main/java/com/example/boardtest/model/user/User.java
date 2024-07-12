@@ -13,6 +13,11 @@ public record User(
         String password,
         String profile,
         String description,
+
+        Long followersCount,
+
+        Long followingsCount,
+
         ZonedDateTime createdDateTime,
         ZonedDateTime updatedDateTime
 ) {
@@ -23,6 +28,8 @@ public record User(
                 userEntity.getPassword(),
                 userEntity.getProfile(),
                 userEntity.getDescription(),
+                userEntity.getFollowersCount(),
+                userEntity.getFollowingsCount(),
                 userEntity.getCreatedDateTime(),
                 userEntity.getUpdatedDateTime()
         );

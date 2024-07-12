@@ -1,12 +1,17 @@
 package com.example.boardtest.service;
 
+import com.example.boardtest.exception.follow.FollowAlreadyExistsException;
+import com.example.boardtest.exception.follow.FollowNotFoundException;
+import com.example.boardtest.exception.follow.InvalidFollowException;
 import com.example.boardtest.exception.user.UserAleradyExistsException;
 import com.example.boardtest.exception.user.UserNotAllowedException;
 import com.example.boardtest.exception.user.UserNotFoundException;
+import com.example.boardtest.model.entity.FollowEntity;
 import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.user.User;
 import com.example.boardtest.model.user.UserAuthenticationResponse;
 import com.example.boardtest.model.user.UserPatchRequestBody;
+import com.example.boardtest.repository.FollowEntityRepository;
 import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +34,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private FollowEntityRepository followEntityRepository;
 
 
     @Override
@@ -99,4 +108,62 @@ public class UserService implements UserDetailsService {
 
         return User.from(userEntityRepository.save(user));
     }
+
+
+    //Follow
+    @Transactional
+    public User follow(String username, UserEntity currentUser) {
+        //Follow 할려는 대상조회
+        var following =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+
+        //본인스스로 Follow 못하게 막는다
+        if (currentUser.equals(following)) {
+            throw new InvalidFollowException("A user cannot follow themselves.");
+        }
+
+        followEntityRepository
+                .findByFollowerAndFollowing(currentUser, following)
+                .ifPresent(//해당 Follow가 존재하면 execption처리
+                        follow -> {
+                            throw new FollowAlreadyExistsException(currentUser, following);
+                        });
+        followEntityRepository.save(FollowEntity.of(currentUser, following));
+
+        following.setFollowersCount(following.getFollowersCount() + 1);
+        currentUser.setFollowingsCount(currentUser.getFollowingsCount() + 1);
+
+        userEntityRepository.save(following);
+        userEntityRepository.save(currentUser);
+
+        return User.from(following);
+    }
+
+    //Follow 취소
+    @Transactional
+    public User unFollow(String username, UserEntity currentUser) {
+        var following =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+        if (currentUser.equals(following)) {
+            throw new InvalidFollowException("A user cannot unfollow themselves.");
+        }
+
+        var follow =
+                followEntityRepository
+                        .findByFollowerAndFollowing(currentUser, following)
+                        .orElseThrow(() -> new FollowNotFoundException(currentUser, following));
+        followEntityRepository.delete(follow);
+
+        long newFollowersCount = Math.max(0, following.getFollowersCount() - 1);
+        long newFollowingsCount = Math.max(0, currentUser.getFollowingsCount() - 1);
+        following.setFollowersCount(newFollowersCount);
+        currentUser.setFollowingsCount(newFollowingsCount);
+
+        userEntityRepository.save(following);
+        userEntityRepository.save(currentUser);
+
+        return User.from(following);
+    }
+
+
 }

@@ -73,4 +73,21 @@ public class UserController {
         var posts = postService.getPostsByUsername(username);
         return ResponseEntity.ok(posts);
     }
+
+    
+
+    //follows 추가
+    @PostMapping("/{username}/follows")
+    public ResponseEntity<User> follow(@PathVariable String username, Authentication authentication) {
+        var user = userService.follow(username, (UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    //follows 취소
+    @DeleteMapping("/{username}/follows")
+    public ResponseEntity<User> unfollow(
+            @PathVariable String username, Authentication authentication) {
+        var user = userService.unFollow(username, (UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }
