@@ -69,9 +69,9 @@ public class UserController {
 
     //특정 유저가 작성한 게시물을 모두 조회
     @GetMapping("/{username}/posts")
-    public ResponseEntity<List<Post>> getPostsByUsername(@PathVariable String username){
-        var posts = postService.getPostsByUsername(username);
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable String username,Authentication authentication){
+        var posts = postService.getPostsByUsername(username,(UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
 
@@ -92,18 +92,6 @@ public class UserController {
     }
 
 
-
-    @GetMapping("/{username}/followers")
-    public ResponseEntity<List<User>> getFollowersByUser(@PathVariable String username) {
-        var followers = userService.getFollowersByUsername(username);
-        return new ResponseEntity<>(followers, HttpStatus.OK);
-    }
-
-    @GetMapping("/{username}/followings")
-    public ResponseEntity<List<User>> getFollowingsByUser(@PathVariable String username) {
-        var followings = userService.getFollowingsByUsername(username);
-        return new ResponseEntity<>(followings, HttpStatus.OK);
-    }
 
 
 }
