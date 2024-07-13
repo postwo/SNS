@@ -4,7 +4,9 @@ import com.example.boardtest.model.entity.UserEntity;
 import com.example.boardtest.model.post.Post;
 import com.example.boardtest.model.post.PostPatchRequestBody;
 import com.example.boardtest.model.post.PostPostRequestBody;
+import com.example.boardtest.model.user.LikedUser;
 import com.example.boardtest.service.PostService;
+import com.example.boardtest.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private UserService userService;
+
     //전체조회
     @GetMapping
     public ResponseEntity<List<Post>> getPosts(Authentication authentication){
@@ -39,6 +44,16 @@ public class PostController {
         var post = postService.getPostByPostId(postId, (UserEntity) authentication.getPrincipal());
         return ResponseEntity.ok(post);
     }
+
+    //좋아요 목록 조회
+    @GetMapping("/{postId}/liked-users")
+    public ResponseEntity<List<LikedUser>> getLikedUsersByPostId(
+            @PathVariable Long postId, Authentication authentication) {
+        var likedUsers =
+                userService.getLikedUsersByPostId(postId, (UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(likedUsers, HttpStatus.OK);
+    }
+
 
     //게시물 생성 POST /posts
     //@RequestBody 가 정상적으로 동작하기 위해서는 빈생성자가 있어야 한다
@@ -72,10 +87,12 @@ public class PostController {
     //좋아요
     @PostMapping("/{postId}/likes")
     public ResponseEntity<Post> toggleLike(@PathVariable Long postId, Authentication authentication) {
-        System.out.println("여기");
         var post = postService.toggleLike(postId, (UserEntity) authentication.getPrincipal());
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
+
+
+
 
 
 }

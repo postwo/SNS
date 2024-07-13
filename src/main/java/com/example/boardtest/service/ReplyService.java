@@ -3,6 +3,7 @@ package com.example.boardtest.service;
 import com.example.boardtest.exception.post.PostNotFoundException;
 import com.example.boardtest.exception.reply.ReplyNotFoundException;
 import com.example.boardtest.exception.user.UserNotAllowedException;
+import com.example.boardtest.exception.user.UserNotFoundException;
 import com.example.boardtest.model.entity.PostEntity;
 import com.example.boardtest.model.entity.ReplyEntity;
 import com.example.boardtest.model.entity.UserEntity;
@@ -83,5 +84,15 @@ public class ReplyService {
         replyEntityRepository.delete(replyEntity);
         postEntity.setRepliesCount(Math.max(0, postEntity.getRepliesCount() - 1));
         postEntityRepository.save(postEntity);
+    }
+
+    //댓글 목록
+    public List<Reply> getRepliesByUser(String username) {
+        var user =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+
+        var replyEntities = replyEntityRepository.findByUser(user);
+
+        return replyEntities.stream().map(Reply::from).toList();
     }
 }

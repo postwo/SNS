@@ -3,15 +3,18 @@ package com.example.boardtest.service;
 import com.example.boardtest.exception.follow.FollowAlreadyExistsException;
 import com.example.boardtest.exception.follow.FollowNotFoundException;
 import com.example.boardtest.exception.follow.InvalidFollowException;
+import com.example.boardtest.exception.post.PostNotFoundException;
 import com.example.boardtest.exception.user.UserAleradyExistsException;
 import com.example.boardtest.exception.user.UserNotAllowedException;
 import com.example.boardtest.exception.user.UserNotFoundException;
 import com.example.boardtest.model.entity.FollowEntity;
+import com.example.boardtest.model.entity.LikeEntity;
+import com.example.boardtest.model.entity.PostEntity;
 import com.example.boardtest.model.entity.UserEntity;
-import com.example.boardtest.model.user.User;
-import com.example.boardtest.model.user.UserAuthenticationResponse;
-import com.example.boardtest.model.user.UserPatchRequestBody;
+import com.example.boardtest.model.user.*;
 import com.example.boardtest.repository.FollowEntityRepository;
+import com.example.boardtest.repository.LikeEntityRepository;
+import com.example.boardtest.repository.PostEntityRepository;
 import com.example.boardtest.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -38,11 +42,25 @@ public class UserService implements UserDetailsService {
     @Autowired
     private FollowEntityRepository followEntityRepository;
 
-    //대상 유저를 currentUser가 Following하고 있는지를 조회
+    @Autowired
+    private PostEntityRepository postEntityRepository;
+
+    @Autowired
+    private LikeEntityRepository likeEntityRepository;
+
+
+    //대상 유저를 currentUser가 Following하고 있는지를 조회 공통 메소드
     private User getUserWithFollowingStatus(UserEntity user, UserEntity currentUser) {
         var isFollowing =
                 followEntityRepository.findByFollowerAndFollowing(currentUser, user).isPresent();
         return User.from(user, isFollowing);
+    }
+
+
+    private LikedUser getLikedUserWithFollowingStatus(LikeEntity likeEntity, PostEntity postEntity, UserEntity currentUser) {
+            var likedUserEntity = likeEntity.getUser(); //좋아요를 누른 유저정보를 가지고 온다
+            var userWithFollowingStatus = getUserWithFollowingStatus(likedUserEntity,currentUser);
+            return LikedUser.from(userWithFollowingStatus,postEntity.getPostId(),likeEntity.getCreatedDateTime());
     }
 
 
@@ -174,11 +192,13 @@ public class UserService implements UserDetailsService {
     }
 
     //Followers 목록
-    public List<User> getFollowersByUsername(String username, UserEntity currentUser) {
+    public List<Follower> getFollowersByUsername(String username, UserEntity currentUser) {
         var following =
                 userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
         var followEntities = followEntityRepository.findByFollowing(following);
-        return followEntities.stream().map(follow -> getUserWithFollowingStatus(follow.getFollower(),currentUser)).toList();
+        return followEntities.stream()
+                .map(follow-> Follower.from(getUserWithFollowingStatus(follow.getFollower()
+                        ,currentUser),follow.getCreatedDateTime())).toList();
     }
 
 
@@ -189,5 +209,34 @@ public class UserService implements UserDetailsService {
         var followEntities = followEntityRepository.findByFollower(follower);
         return followEntities.stream().map(follow -> getUserWithFollowingStatus(follow.getFollowing(),currentUser)).toList();
     }
+
+    //좋아요 개수인 부분을 클릭하면 생기는 모달창에 좋아요한사람들에 리스트
+    public List<LikedUser> getLikedUsersByPostId(Long postId, UserEntity currentUser) {
+        var postEntity = postEntityRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        var likeEntities = likeEntityRepository.findByPost(postEntity);
+
+        return likeEntities.stream().map(likeEntity ->getLikedUserWithFollowingStatus(likeEntity,postEntity,currentUser)).toList();
+    }
+
+
+    //유저단위로 좋아요 리스트
+    public List<LikedUser> getLikedUsersByUser(String username, UserEntity currentUser) {
+
+        var userEntity =
+                userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+
+        var postEntities = postEntityRepository.findByUser(userEntity); // 게시물들을 가져옴
+
+
+        return postEntities.stream()
+                .flatMap(postEntity -> likeEntityRepository.findByPost(postEntity).stream()
+                        .map(likeEntity -> getLikedUserWithFollowingStatus(likeEntity, postEntity, currentUser)))
+                .collect(Collectors.toList());
+    }
+
+
+
+
 
 }
