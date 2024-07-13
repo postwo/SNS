@@ -46,22 +46,22 @@ public class UserController {
 
     //검색
     @GetMapping
-    public ResponseEntity<List<User>> getUsers(@RequestParam(required = false) String query){
-        var users = userService.getUsers(query);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<User>> getUsers(@RequestParam(required = false) String query, Authentication authentication){
+        var user = userService.getUsers(query, (UserEntity) authentication.getPrincipal());
+        return ResponseEntity.ok(user);
     }
 
 
     //단건 조회
     @GetMapping("/{username}")
-    public ResponseEntity<User> getUser(@PathVariable String username){
-        var user = userService.getUser(username);
+    public ResponseEntity<User> getUser(@PathVariable String username, Authentication authentication){
+        var user = userService.getUser(username, (UserEntity) authentication.getPrincipal());
         return ResponseEntity.ok(user);
     }
 
     //정보수정
     @PatchMapping("/{username}")
-    public ResponseEntity<User> getUser(@PathVariable String username, @RequestBody UserPatchRequestBody requestBody, Authentication authentication){
+    public ResponseEntity<User> getUserUpdate(@PathVariable String username, @RequestBody UserPatchRequestBody requestBody, Authentication authentication){
         var user = userService.updateUser(username,requestBody,(UserEntity) authentication.getPrincipal());
         return ResponseEntity.ok(user);
     }
@@ -91,6 +91,22 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+
+    @GetMapping("/{username}/followers")
+    public ResponseEntity<List<User>> getFollowersByUser(
+            @PathVariable String username, Authentication authentication) {
+        var followers =
+                userService.getFollowersByUsername(username, (UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(followers, HttpStatus.OK);
+    }
+
+    @GetMapping("/{username}/followings")
+    public ResponseEntity<List<User>> getFollowingsByUser(
+            @PathVariable String username, Authentication authentication) {
+        var followings =
+                userService.getFollowingsByUsername(username, (UserEntity) authentication.getPrincipal());
+        return new ResponseEntity<>(followings, HttpStatus.OK);
+    }
 
 
 

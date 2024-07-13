@@ -38,6 +38,13 @@ public class UserService implements UserDetailsService {
     @Autowired
     private FollowEntityRepository followEntityRepository;
 
+    //대상 유저를 currentUser가 Following하고 있는지를 조회
+    private User getUserWithFollowingStatus(UserEntity user, UserEntity currentUser) {
+        var isFollowing =
+                followEntityRepository.findByFollowerAndFollowing(currentUser, user).isPresent();
+        return User.from(user, isFollowing);
+    }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -73,7 +80,7 @@ public class UserService implements UserDetailsService {
 
 
     //검색
-    public List<User> getUsers(String query) {
+    public List<User> getUsers(String query, UserEntity currentUser) {
         List<UserEntity> userEntities;
 
 
@@ -84,13 +91,14 @@ public class UserService implements UserDetailsService {
             userEntities  = userEntityRepository.findAll();
         }
 
-        return userEntities.stream().map(User::from).toList();
+        return userEntities.stream().map(userEntity -> getUserWithFollowingStatus(userEntity,currentUser)).toList();
     }
 
     //단건조회
-    public User getUser(String username) {
+    public User getUser(String username, UserEntity currentUser) {
         var userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
-    return User.from(userEntity);
+
+        return getUserWithFollowingStatus(userEntity,currentUser);
     }
 
     //회원정보 수정
@@ -136,7 +144,7 @@ public class UserService implements UserDetailsService {
         userEntityRepository.save(following);
         userEntityRepository.save(currentUser);
 
-        return User.from(following);
+        return User.from(following,true);
     }
 
     //Follow 취소
@@ -162,24 +170,24 @@ public class UserService implements UserDetailsService {
         userEntityRepository.save(following);
         userEntityRepository.save(currentUser);
 
-        return User.from(following);
+        return User.from(following,false);
     }
 
     //Followers 목록
-    public List<User> getFollowersByUsername(String username) {
+    public List<User> getFollowersByUsername(String username, UserEntity currentUser) {
         var following =
                 userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
         var followEntities = followEntityRepository.findByFollowing(following);
-        return followEntities.stream().map(follow -> User.from(follow.getFollower())).toList();
+        return followEntities.stream().map(follow -> getUserWithFollowingStatus(follow.getFollower(),currentUser)).toList();
     }
 
 
     //Followings 목록
-    public List<User> getFollowingsByUsername(String username) {
+    public List<User> getFollowingsByUsername(String username, UserEntity currentUser) {
         var follower =
                 userEntityRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
         var followEntities = followEntityRepository.findByFollower(follower);
-        return followEntities.stream().map(follow -> User.from(follow.getFollowing())).toList();
+        return followEntities.stream().map(follow -> getUserWithFollowingStatus(follow.getFollowing(),currentUser)).toList();
     }
 
 }
